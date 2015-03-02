@@ -1,0 +1,126 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<script type="text/javascript" src="ansi.js"></script>
+
+<polymer-element name="telnet-element">
+    <template>
+        <label for="websocketHost">Websocket relay:</label> <input id="websocketHost" value="{{wsurl}}"> <br/>
+    <label for="encodingSelect">encoding: </label><select id="encodingSelect" value="{{encoding}}" selectedIndex="{{selectedIndex}}">
+        <option template repeat="{{encoding in encodings}}">{{encoding}}</option>
+    </select>
+        <button on-click="{{ connect }}">Connect</button><button on-click="{{ disconnect }}">Disconnect</button><br />
+        <label for="width">width:</label><input id="width" value="{{width}}">
+        <label for="height">height:</label><input id="height" value="{{height}}">
+
+        <div id="messagecontainer" on-click="{{focusMessage}}" on-keydown="{{keydown}}" on-keypress="{{keypress}}" tabindex="0" style="font-family:monospace;font-style:normal;height:{{height}};width:{{width}};overflow:auto;">
+            <pre id="messages" style="font-family:monospace;font-style:normal;font-weight:normal;letter-spacing:-1px;line-height:1;display:inline;">
+            </pre>
+        </div>
+    </template>
+    
+    <script>
+        Polymer({
+            height:'40em',
+            width:'80em',
+            selectedIndex: 0,
+            encoding: 'utf-8',
+            encodings: ['utf-8', 'windows-1252'],
+            wsurl: "ws://meobets.com:12355",
+            messageData: '',
+            sendData: null,
+            wsProto: 'binary',
+            ANSI: require('ansi-graphics'),
+            ready: function() {
+                this.$.messagecontainer.focus();
+                this.$.messagecontainer.addEventListener('keydown', function(ev) {
+                    if (ev.keyCode == 8) {
+                        ev.preventDefault();
+                    }
+                }, false);
+            },
+            focusMessage: function() {
+                this.$.messagecontainer.focus();
+                console.log('click');
+            },
+            connect: function() {
+                if (!this.wsurl) {
+                    throw new Error('no ws url');
+                }
+                if (this.ws) {
+                    throw new Error('ws already connected');
+                }
+                this.ws = new WebSocket(this.wsurl, this.wsProto);
+                this.ws.onmessage = this.onMessage.bind(this);
+                console.log('websocket connecting, encoding: ', this.encoding);
+                this.$.messagecontainer.focus();
+            },
+            disconnect: function() {
+                if (!this.ws) {
+                    throw new Error('ws already disconnected');
+                }
+                else {
+                    this.ws.close();
+                    this.ws = null;
+                    console.log('websocket disconnecting');
+                    this.messageData = '';
+                    this.updateMessages();
+                }
+            },
+            send: function(data) {
+                if(!this.ws) {
+                    throw new Error('no ws connection');
+                } 
+                console.log('sending', data);
+                this.ws.send(data);
+            },
+            onMessage: function(ev) {
+                var fr = new FileReader();
+                fr.readAsText(ev.data, this.encoding);
+                fr.onloadend = function() {
+                    this.addToMessages(fr.result);
+                }.bind(this);
+                this.lastMessageTime = Date.now();
+            },
+            addToMessages: function(msg) {
+                msg = this.removeTrailingReturns(msg);
+                // console.log(JSON.stringify(msg));
+                this.messageData += this.parseMessage(msg);
+                this.updateMessages();
+            },
+
+            updateMessages: function() {
+                this.injectBoundHTML(this.messageData, this.$.messages);
+                this.$.messagecontainer.scrollTop = this.$.messagecontainer.scrollHeight;
+            },
+            parseMessage: function(msg) {
+                var parser = new this.ANSI();
+                parser.fromString(msg);
+                return parser.HTML.replace(/\n/g, '').replace(/\r/g, '');
+            },
+            timeSinceLastMessage: function() {
+                return (this.lastMessageTime) ? Date.now() - this.lastMessageTime : 0;
+            },
+            keypress: function(ev) {
+                console.log(ev);
+                if (ev.keyCode == 13) {
+                    this.messageData = this.messageData + '<br>';
+                }
+                if (ev.keyCode == 8) {
+                    this.send('^H');
+                }
+                var input = String.fromCharCode(ev.which);
+                this.send(input);
+            },
+            keydown: function(ev) {
+                console.log(ev);
+                ev.preventDefault;
+                ev.stopPropagation();
+            },
+            removeTrailingReturns: function(str) {
+                if (str.substr(str.length - 2) == '\r\n') {
+                    return str.substr(0, str.length - 2);
+                }
+                return str;
+            }
+        });
+    </script>
+</polymer-element>
