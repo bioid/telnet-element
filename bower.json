@@ -14,6 +14,5 @@
   ],
   "dependencies": {
     "polymer": "~0.5.5",
-    "ansi_up": "~1.1.3"
   }
 }
