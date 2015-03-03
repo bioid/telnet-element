@@ -22,6 +22,7 @@
             height:'40em',
             width:'80em',
             selectedIndex: 0,
+            bufferSize: 200,
             encoding: 'utf-8',
             encodings: ['utf-8', 'windows-1252'],
             wsurl: "ws://meobets.com:12355",
@@ -34,6 +35,7 @@
                 this.$.messagecontainer.addEventListener('keydown', function(ev) {
                     if (ev.keyCode == 8) {
                         ev.preventDefault();
+                        ev.stopPropagation();
                     }
                 }, false);
             },
@@ -86,8 +88,8 @@
                 this.messageData += this.parseMessage(msg);
                 this.updateMessages();
             },
-
             updateMessages: function() {
+                this.truncateMessages();
                 this.injectBoundHTML(this.messageData, this.$.messages);
                 this.$.messagecontainer.scrollTop = this.$.messagecontainer.scrollHeight;
             },
@@ -95,6 +97,12 @@
                 var parser = new this.ANSI();
                 parser.fromString(msg);
                 return parser.HTML.replace(/\n/g, '').replace(/\r/g, '');
+            },
+            truncateMessages: function() {
+                var msgs = this.messageData.split('<br/>');
+                if (msgs.length > this.bufferSize) {
+                    this.messageData = msgs.slice(-1 * this.bufferSize).join("<br/>");
+                }
             },
             timeSinceLastMessage: function() {
                 return (this.lastMessageTime) ? Date.now() - this.lastMessageTime : 0;
@@ -105,15 +113,10 @@
                     this.messageData = this.messageData + '<br>';
                 }
                 if (ev.keyCode == 8) {
-                    this.send('^H');
+                    this.send('\b');
                 }
                 var input = String.fromCharCode(ev.which);
                 this.send(input);
-            },
-            keydown: function(ev) {
-                console.log(ev);
-                ev.preventDefault;
-                ev.stopPropagation();
             },
             removeTrailingReturns: function(str) {
                 if (str.substr(str.length - 2) == '\r\n') {
