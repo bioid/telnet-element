@@ -3,8 +3,7 @@
 
 <polymer-element name="telnet-element">
     <template>
-        <label for="websocketHost">Websocket relay:</label> 
-        <input id="websocketHost" value="{{wsurl}}"> <br/>
+        <label for="websocketHost">Websocket relay:</label><input id="websocketHost" value="{{wsurl}}"> <br/>
         <label for="encodingSelect">encoding: </label>
         <select id="encodingSelect" value="{{encoding}}" selectedIndex="{{selectedIndex}}">
             <option template repeat="{{encoding in encodings}}">{{encoding}}</option>
@@ -43,7 +42,6 @@
             },
             focusMessage: function() {
                 this.$.messagecontainer.focus();
-                console.log('click');
             },
             connect: function() {
                 if (!this.wsurl) {
@@ -82,7 +80,6 @@
                 fr.onloadend = function() {
                     this.addToMessages(fr.result);
                 }.bind(this);
-                this.lastMessageTime = Date.now();
             },
             addToMessages: function(msg) {
                 msg = this.removeTrailingReturns(msg);
@@ -100,14 +97,11 @@
                 return parser.HTML.replace(/\n/g, '').replace(/\r/g, '');
             },
             truncateMessages: function() {
-                var msgs = this.messageData.split('<br/>');
-                if (msgs.length > this.bufferSize) {
+                var lines = this.messageData.split('<br/>');
+                if (lines.length > this.bufferSize) {
                     // chop off the top of messageData
-                    this.messageData = msgs.slice(-1 * this.bufferSize).join("<br/>");
+                    this.messageData = lines.slice(-this.bufferSize).join("<br/>");
                 }
-            },
-            timeSinceLastMessage: function() {
-                return (this.lastMessageTime) ? Date.now() - this.lastMessageTime : 0;
             },
             keypress: function(ev) {
                 if (ev.keyCode == 13) {
