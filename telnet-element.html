@@ -1,7 +1,7 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
 <script type="text/javascript" src="ansi.js"></script>
 
-<polymer-element name="telnet-element">
+<polymer-element name="telnet-element" attributes="wsurl">
     <template>
         <label for="websocketHost">Websocket relay:</label><input id="websocketHost" value="{{wsurl}}"> <br/>
         <label for="encodingSelect">encoding: </label>
@@ -32,7 +32,7 @@
             wsProto: 'binary',
             ANSI: require('ansi-graphics'),
             ready: function() {
-                this.$.messagecontainer.focus();
+                this.focusMessage();
                 this.$.messagecontainer.addEventListener('keydown', function(ev) {
                     if (ev.keyCode == 8) {
                         ev.preventDefault();
@@ -53,7 +53,7 @@
                 this.ws = new WebSocket(this.wsurl, this.wsProto);
                 this.ws.onmessage = this.onMessage.bind(this);
                 console.log('websocket connecting, encoding: ', this.encoding);
-                this.$.messagecontainer.focus();
+                this.focusMessage();
             },
             disconnect: function() {
                 if (!this.ws) {
@@ -94,7 +94,8 @@
             parseMessage: function(msg) {
                 var parser = new this.ANSI();
                 parser.fromString(msg);
-                return parser.HTML.replace(/\n/g, '').replace(/\r/g, '');
+                var parsed = parser.HTML.replace(/\n/g, '').replace(/\r/g, '');
+                return parsed;
             },
             truncateMessages: function() {
                 var lines = this.messageData.split('<br/>');
@@ -105,7 +106,7 @@
             },
             keypress: function(ev) {
                 if (ev.keyCode == 13) {
-                    this.messageData = this.messageData + '<br>';
+                    this.messageData += '<br/>';
                 }
                 var input = String.fromCharCode(ev.which);
                 this.send(input);
