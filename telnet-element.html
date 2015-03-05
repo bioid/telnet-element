@@ -1,5 +1,19 @@
-<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="../polymer/polymer.html">
 <script type="text/javascript" src="ansi.js"></script>
+
+<!--
+Element containing a telnet emulator. Requires a websocket <=> TCP proxy defined in the 'wsurl' attribute.
+
+##### Example
+
+    <telnet-element wsurl="ws://meobets.com:12355"></telnet-element>
+
+@element telnet-element
+@blurb Element containing a telnet emulator. Requires a websocket <=> TCP proxy defined in the 'wsurl' attribute.
+@status alpha
+@homepage http://github.com/bioid/telnet-element
+-->
+
 
 <polymer-element name="telnet-element" attributes="wsurl">
     <template>
@@ -26,6 +40,14 @@
             bufferSize: 200,
             encoding: 'utf-8',
             encodings: ['utf-8', 'windows-1252'],
+           /**
+            * The `wsurl` attribute sets the websocket proxy to connect to.
+            * Must be prefaced with 'ws://' and include the port.
+            *
+            * @attribute wsurl
+            * @type string
+            * @default 'ws://meobets.com:12355'
+            */
             wsurl: "ws://meobets.com:12355",
             messageData: '',
             sendData: null,

@@ -1,18 +1,27 @@
 {
-  "name": "poly",
-  "version": "0.0.0",
+  "name": "telnet-element",
+  "version": "0.1.0",
   "authors": [
-    "brandon hinshaw <bkhinshaw@gmail.com>"
+    "Brandon Hinshaw <bkhinshaw@gmail.com>"
   ],
+  "description": "A polymer element containing a telnet emulator that connects through a websocket<=>tcp proxy",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "seed"
+  ],
+  "main": "seed-element.html",
   "license": "MIT",
+  "homepage": "https://github.com/bioid/telnet-element",
   "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
+    "/.*",
+    "/tests/"
   ],
   "dependencies": {
-    "polymer": "~0.5.5",
+    "polymer": "Polymer/polymer#^0.5.4"
+  },
+  "devDependencies": {
+    "web-component-tester": "*"
   }
 }
