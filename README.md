@@ -5,3 +5,4 @@ This requires a websocket/TCP relay, due to browser limitations around opening T
 * python - websockify.py - https://github.com/kanaka/websockify
 * nodejs - node-tcp-ws-router - https://github.com/bioid/node-tcp-ws-router
 
+Uses a modified and browserified version of echicken's ansi-graphics module to parse the ansi escape codes. Original found here: https://github.com/echicken/node-ansi
